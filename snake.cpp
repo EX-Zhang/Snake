@@ -31,9 +31,10 @@ snake::snake(int x, int y)
 
 	this->head = head;
 	this->cur_direction = RIGHT;
+
 }
 
-int* snake::next_head_position()
+int snake::next_head_position(int* x, int* y)
 {
 
 	int cur_x = this->head->x;
@@ -52,23 +53,25 @@ int* snake::next_head_position()
 		cur_x += 1;
 	}
 
-	static int next_pos[2] = { cur_x,cur_y };
+	*x = cur_x;
+	*y = cur_y;
 
-	return next_pos;
+	return 0;
 }
 
-int* snake::get_cur_position()
+int snake::get_cur_position(int* x, int* y)
 {
 
-	static int pos[2] = { this->head->x,this->head->y };
+	*x = this->head->x;
+	*y = this->head->y;
 
-	return pos;
+	return 0;
 }
 
 void snake::change_direction(int direction)
 {
 
-	if (direction != this->cur_direction&&direction != -1 * this->cur_direction) {
+	if (direction != this->cur_direction && direction != -1 * this->cur_direction) {
 
 		this->cur_direction = direction;
 
@@ -78,12 +81,15 @@ void snake::change_direction(int direction)
 
 void snake::add()
 {
-	int* new_head_pos = this->next_head_position();
+
+	int x, y;
+
+	this->next_head_position(&x, &y);
 	
 	snake_node* new_head = (snake_node*)malloc(sizeof(snake_node));
 
-	new_head->x = new_head_pos[0];
-	new_head->y = new_head_pos[1];
+	new_head->x = x;
+	new_head->y = y;
 	new_head->next = this->head;
 
 	this->head = new_head;
@@ -92,25 +98,24 @@ void snake::add()
 void snake::move()
 {
 
-	int* new_head_pos = this->next_head_position();
+	int x, y;
+
+	this->next_head_position(&x, &y);
 
 	snake_node* cur = this->head;
-	snake_node* prev = NULL;
 
-	while (cur != NULL && cur->next != NULL) {
+	while (cur->next->next != NULL) {
 
-		prev = cur;
 		cur = cur->next;
 
 	}
 
-	cur->x = new_head_pos[0];
-	cur->y = new_head_pos[1];
-	cur->next = this->head;
+	cur->next->next = this->head;
+	this->head = cur->next;
+	this->head->x = x;
+	this->head->y = y;
 
-	this->head = cur;
-
-	prev->next = NULL;
+	cur->next = NULL;
 
 }
 
@@ -150,4 +155,47 @@ bool snake::hit_self(int x, int y)
 	}
 
 	return false;
+}
+
+bool snake::hit_self()
+{
+
+	int x = this->head->x;
+	int y = this->head->y;
+
+	snake_node* cur = this->head->next;
+
+	while (cur != NULL) {
+
+		if (cur->x == x && cur->y == y) {
+
+			return true;
+
+		}
+
+		cur = cur->next;
+
+	}
+
+	return false;
+
+}
+
+void snake::del_snake()
+{
+
+	this->del_snake(this->head);
+
+}
+
+void snake::del_snake(snake_node* cur_node)
+{
+
+	if (cur_node != NULL) {
+
+		this->del_snake(cur_node->next);
+		free(cur_node);
+
+	}
+
 }

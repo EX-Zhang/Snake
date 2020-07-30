@@ -8,8 +8,8 @@ game::game()
 	map new_map(this->rows, this->cols);
 	this->game_map = new_map;
 
-	int snake_x = rand() % cols;
-	int snake_y = rand() % rows;
+	int snake_x = get_rand(this->cols);
+	int snake_y = get_rand(this->rows);
 
 	while (true) {
 
@@ -17,8 +17,8 @@ game::game()
 			break;
 		}
 
-		snake_x = rand() % cols;
-		snake_y = rand() % rows;
+		snake_x = get_rand(this->cols); 
+		snake_y = get_rand(this->rows); 
 	}
 
 	snake new_snake(snake_x, snake_y);
@@ -33,50 +33,10 @@ game::game()
 void game::print_game()
 {
 
-	for (int i = 0; i < cols; i++) {
-		for (int j = 0; j < rows; j++) {
+	for (int i = 0; i < this->cols; i++) {
+		for (int j = 0; j < this->rows; j++) {
 
 			setPos(i, j);
-
-			/*if (this->game_map.is_edge(i, j) || this->player_snake.pos_has_node(i, j) || this->is_food(i, j)) {
-
-				printf("¡ö");
-
-			}
-			else {
-
-				printf(" ");
-
-			}*/
-
-			if (i == 10 && j == 5) {
-
-				int* array = this->player_snake.next_head_position();
-
-				if (this->game_map.is_edge(array[0], array[1])) {
-					printf("HIT");
-				}
-				else {
-					printf(" ");
-				}
-
-			}
-
-			if (i == 10 && j == 10) {
-
-				int* array = this->player_snake.next_head_position();
-
-				printf("%d %d", array[0], array[1]);
-
-			}
-
-			if (i == 10 && j == 20) {
-
-				int* array = this->player_snake.get_cur_position();
-
-				printf("%d %d", array[0], array[1]);
-
-			}
 
 			if (this->game_map.is_edge(i, j)) {
 				printf("A");
@@ -102,8 +62,8 @@ void game::generate_food()
 	int cur_x = this->food[0];
 	int cur_y = this->food[1];
 
-	int food_x = rand() % cols;
-	int food_y = rand() % rows;
+	int food_x = get_rand(this->cols);
+	int food_y = get_rand(this->rows);
 
 	while (true) {
 
@@ -111,8 +71,8 @@ void game::generate_food()
 			break;
 		}
 
-		food_x = rand() % cols;
-		food_y = rand() % rows;
+		food_x = get_rand(this->cols); 
+		food_y = get_rand(this->rows);
 
 	}
 
@@ -122,10 +82,9 @@ void game::generate_food()
 
 bool game::is_food()
 {
-	int* next_head_pos = this->player_snake.next_head_position();
+	int x, y;
 
-	int x = next_head_pos[0];
-	int y = next_head_pos[1];
+	this->player_snake.next_head_position(&x, &y);
 
 	return x == this->food[0] && y == this->food[1];
 }
@@ -138,12 +97,11 @@ bool game::is_food(int x, int y)
 bool game::is_game_end()
 {
 
-	int* head_pos = this->player_snake.get_cur_position();
+	int x, y;
 
-	int x = head_pos[0];
-	int y = head_pos[1];
+	this->player_snake.get_cur_position(&x, &y);
 
-	return this->player_snake.hit_self(x, y) || this->game_map.is_edge(x, y);
+	return this->player_snake.hit_self() || this->game_map.is_edge(x, y);
 
 }
 
@@ -156,7 +114,7 @@ void game::game_start()
 	system(str);
 
 	setPos(cols / 2 - 10, rows / 2);
-	printf("Press anykey to start\n");
+	printf("Press ENTER to start\n");
 
 	getchar();
 
@@ -188,7 +146,11 @@ void game::game_circle()
 				this->player_snake.change_direction(RIGHT);
 			}
 
-			if (is_food()) {
+			int x, y;
+
+			this->player_snake.get_cur_position(&x, &y);
+
+			if (is_food(x,y)) {
 				this->player_snake.add();
 				generate_food();
 				this->score++;
@@ -197,13 +159,15 @@ void game::game_circle()
 				this->player_snake.move();
 			}
 
+
+
 			n = 0;
 		}
 
-		/*if (this->is_game_end()) {
+		if (this->is_game_end()) {
 			this->print_game();
 			break;
-		}*/
+		}
 		n++;
 
 	}
@@ -213,8 +177,18 @@ void game::game_circle()
 void game::game_end()
 {
 
+	this->clean_screen();
+
 	setPos(cols / 2 - 10, rows / 2);
-	printf("GAME END!\nScore: %d\nPress anykey to exit", this->score);
+	printf("GAME END!");
+
+	setPos(cols / 2 - 10, rows / 2 + 1);
+	printf("Score: %d", this->score);
+
+	setPos(cols / 2 - 10, rows / 2 + 2);
+	printf("Press ENTER to exit");
+
+	this->player_snake.del_snake();
 
 	getchar();
 
@@ -228,4 +202,24 @@ void setPos(int x, int y)
 	pos.Y = y;
 	hOutput = GetStdHandle(STD_OUTPUT_HANDLE);
 	SetConsoleCursorPosition(hOutput, pos);
+}
+
+void game::clean_screen()
+{
+
+	for (int i = 0; i < this->cols; i++) {
+		for (int j = 0; j < this->rows; j++) {
+
+			setPos(i, j);
+
+			printf(" ");
+		}
+	}
+
+}
+
+int get_rand(int num)
+{
+	srand((unsigned)time(NULL));
+	return rand() % num;
 }

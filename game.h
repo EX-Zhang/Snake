@@ -3,6 +3,7 @@
 
 #include <cstdio>
 #include <cstdlib>
+#include <time.h> 
 
 #include "snake.h"
 #include "map.h"
@@ -23,6 +24,7 @@ private:
 	void generate_food();
 	bool is_food();
 	bool is_food(int x, int y);
+	void clean_screen();
 
 public:
 	game();
@@ -32,4 +34,5 @@ public:
 };
 
 void setPos(int x, int y);
+int get_rand(int num);
 #endif // !GAME_H

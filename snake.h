@@ -24,17 +24,23 @@ private:
 
 	int cur_direction;
 
+	void del_snake(snake_node* cur_node);
+
+
 public:
 
 	snake();
 	snake(int x, int y);
-	int* next_head_position();
+	int next_head_position(int* x, int* y);
 	void change_direction(int direction);
 	void add();
 	void move();
 	bool pos_has_node(int x, int y);
-	int* get_cur_position();
+	int get_cur_position(int* x, int* y);
 	bool hit_self(int x, int y);
+	bool hit_self();
+	void del_snake();
+
 };
 
 
